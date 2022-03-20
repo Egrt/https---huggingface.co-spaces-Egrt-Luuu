@@ -1,0 +1,249 @@
+{
+  "run_name": "mapping_dataset.unet_resnet101_pretrained.train_val",
+  "master_addr": "localhost",
+  "master_port": "6666",
+  "fold": [
+    "train",
+    "val"
+  ],
+  "seg_params": {
+    "compute_interior": true,
+    "compute_edge": true,
+    "compute_vertex": false
+  },
+  "backbone_params": {
+    "pretrained": true,
+    "name": "unet_resnet",
+    "encoder_depth": 101,
+    "input_features": 3,
+    "num_filters": 32,
+    "dropout_2d": 0.2,
+    "is_deconv": false
+  },
+  "optim_params": {
+    "batch_size": 10,
+    "max_epoch": 47,
+    "optimizer": "Adam",
+    "base_lr": 0.001,
+    "max_lr": 0.1,
+    "gamma": 0.95,
+    "weight_decay": 0,
+    "dropout_keep_prob": 1.0,
+    "log_steps": 200,
+    "checkpoint_epoch": 1,
+    "checkpoints_to_keep": 5,
+    "logs_dirname": "logs",
+    "checkpoints_dirname": "checkpoints"
+  },
+  "runs_dirpath": "runs",
+  "new_run": false,
+  "init_run_name": null,
+  "nodes": 1,
+  "gpus": 0,
+  "nr": 0,
+  "world_size": 4,
+  "dataset_params": {
+    "root_dirname": "mapping_challenge_dataset",
+    "small": false,
+    "seed": 0,
+    "train_fraction": 0.75
+  },
+  "eval_params": {
+    "save_individual_outputs": {
+      "seg": true,
+      "poly_viz": true,
+      "image": false,
+      "seg_gt": false,
+      "seg_mask": true,
+      "seg_opencities_mask": true,
+      "seg_luxcarta": true,
+      "crossfield": false,
+      "uv_angles": true,
+      "poly_shapefile": true,
+      "poly_geojson": false
+    },
+    "save_aggregated_outputs": {
+      "stats": false,
+      "seg_coco": true,
+      "poly_coco": true
+    },
+    "results_dirname": "eval_runs",
+    "test_time_augmentation": false,
+    "batch_size_mult": 64,
+    "patch_size": 1024,
+    "patch_overlap": 200,
+    "seg_threshold": 0.5
+  },
+  "data_dir_candidates": [
+    "/data/titane/user/nigirard/data",
+    "~/data",
+    "/data"
+  ],
+  "num_workers": 12,
+  "data_aug_params": {
+    "enable": true,
+    "vflip": true,
+    "affine": true,
+    "scaling": [
+      0.75,
+      1.5
+    ],
+    "color_jitter": true,
+    "device": "cpu"
+  },
+  "device": "cpu",
+  "use_amp": false,
+  "compute_seg": true,
+  "compute_crossfield": true,
+  "loss_params": {
+    "multiloss": {
+      "normalization_params": {
+        "min_samples": 10,
+        "max_samples": 1000
+      },
+      "coefs": {
+        "epoch_thresholds": [
+          0,
+          5
+        ],
+        "seg": 10,
+        "crossfield_align": 1,
+        "crossfield_align90": 0.2,
+        "crossfield_smooth": 0.005,
+        "seg_interior_crossfield": [
+          0.0,
+          0.2
+        ],
+        "seg_edge_crossfield": [
+          0.0,
+          0.2
+        ],
+        "seg_edge_interior": [
+          0.0,
+          0.2
+        ]
+      }
+    },
+    "seg_loss_params": {
+      "bce_coef": 1.0,
+      "dice_coef": 0.2,
+      "use_dist": true,
+      "use_size": true,
+      "w0": 50,
+      "sigma": 10
+    }
+  },
+  "polygonize_params": {
+    "method": [
+      "simple",
+      "acm"
+    ],
+    "common_params": {
+      "init_data_level": 0.5
+    },
+    "simple_method": {
+      "data_level": 0.5,
+      "tolerance": [
+        0.125
+      ],
+      "seg_threshold": 0.5,
+      "min_area": 10
+    },
+    "asm_method": {
+      "init_method": "marching_squares",
+      "data_level": 0.5,
+      "loss_params": {
+        "coefs": {
+          "step_thresholds": [
+            0,
+            100,
+            200,
+            300
+          ],
+          "data": [
+            1.0,
+            0.1,
+            0.0,
+            0.0
+          ],
+          "crossfield": [
+            0.0,
+            0.05,
+            0.0,
+            0.0
+          ],
+          "length": [
+            0.1,
+            0.01,
+            0.0,
+            0.0
+          ],
+          "curvature": [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "corner": [
+            0.0,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "junction": [
+            0.0,
+            0.0,
+            0.5,
+            0.0
+          ]
+        },
+        "curvature_dissimilarity_threshold": 2,
+        "corner_angles": [
+          45,
+          90,
+          135
+        ],
+        "corner_angle_threshold": 22.5,
+        "junction_angles": [
+          0,
+          45,
+          90,
+          135
+        ],
+        "junction_angle_weights": [
+          1,
+          0.01,
+          0.1,
+          0.01
+        ],
+        "junction_angle_threshold": 22.5
+      },
+      "lr": 0.1,
+      "gamma": 0.995,
+      "device": "cpu",
+      "tolerance": [
+        0.125,
+        1
+      ],
+      "seg_threshold": 0.5,
+      "min_area": 10
+    },
+    "acm_method": {
+      "steps": 500,
+      "data_level": 0.5,
+      "data_coef": 0.1,
+      "length_coef": 0.4,
+      "crossfield_coef": 0.5,
+      "poly_lr": 0.01,
+      "warmup_iters": 100,
+      "warmup_factor": 0.1,
+      "device": "cpu",
+      "tolerance": [
+        0.125,
+        1
+      ],
+      "seg_threshold": 0.5,
+      "min_area": 10
+    }
+  }
+}
